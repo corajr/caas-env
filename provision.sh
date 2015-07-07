@@ -26,8 +26,8 @@ export GIT_SSH_COMMAND=$SSH
 
 
 mkdir -p ~/.ssh
-ssh-keygen -R github.com || true
-ssh-keyscan github.com >> ~/.ssh/known_hosts
+(ssh-keygen -R github.com && ssh-keygen -R remeike.webfactional.com) || true
+ssh-keyscan -t rsa github.com remeike.webfactional.com >> ~/.ssh/known_hosts
 
 ROOT=$HOME/caas
 
