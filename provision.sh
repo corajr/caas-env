@@ -48,7 +48,7 @@ if ! which vv >/dev/null 2>&1 ; then
 	if which brew >/dev/null 2>&1; then
 		brew install bradp/vv/vv
 	else
-        git clone git@github.com:bradp/vv.git
+        pull_or_clone git@github.com:bradp/vv.git vv
         (cd vv; echo export PATH=\"$(pwd):\$PATH\" >> ~/.bashrc)
 	fi
 fi
