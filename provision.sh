@@ -35,16 +35,14 @@ pull_or_clone() {
 	REPO_ADDR="$1"
 	REPO_DIR="$2"
 	if [ -d "$REPO_DIR" ]; then
-		cd "$REPO_DIR"
-		git pull
+		(cd "$REPO_DIR"; git pull)
 	else
 		git clone "$REPO_ADDR" "$REPO_DIR"
 	fi
 }
 
 pull_or_clone git@github.com:corajr/caas.git caas-git
-pull_or_clone git@github.com:corajr/wp-zotero-sync caas-git
-
+pull_or_clone git@github.com:corajr/wp-zotero-sync wp-zotero-sync
 
 if ! which vv >/dev/null 2>&1 ; then
 	if which brew >/dev/null 2>&1; then
