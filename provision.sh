@@ -13,13 +13,18 @@ if ! which vagrant >/dev/null 2>&1 ; then
     exit 1
 fi
 
-if [ ! -f /vagrant/config/id_rsa ]; then
-	echo "Needs a GitHub SSH key in config/id_rsa"
+if [ ! -f $DIR/config/id_rsa ]; then
+	echo "Needs an SSH key in config/id_rsa"
 	exit 1
 fi
 
-cp /vagrant/config/id_rsa ~/.ssh/id_rsa
+SSH_KEY=$DIR/config/id_rsa
+SSH="ssh -i $SSH_KEY"
 
+export GIT_SSH_COMMAND=$SSH
+
+
+mkdir -p ~/.ssh
 ssh-keygen -R github.com && ssh-keyscan github.com >> ~/.ssh/known_hosts
 
 ROOT=$HOME/caas
@@ -73,9 +78,9 @@ EOF
 
 vagrant up
 
-rsync -rlve ssh --dry-run cjr@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ $ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/
+rsync -rlv -e "$SSH" --dry-run cjr@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ $ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/
 
 (cd $ROOT/vvv; \
- ssh cjr@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | xz' | unxz > $ROOT/vvv/remeike_caas_wp.sql && \
+ $SSH $DIR/configcjr@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | xz' | unxz > $ROOT/vvv/remeike_caas_wp.sql && \
 	 vagrant ssh -c 'mysql -uroot -proot plugin_trial < /vagrant/remeike_caas_wp.sql')
 
