@@ -20,7 +20,7 @@ if [ ! -f $DIR/config/id_rsa ]; then
 fi
 
 SSH_KEY=$DIR/config/id_rsa
-SSH="ssh -i $SSH_KEY -o StrictHostKeyChecking=no"
+SSH="ssh -i $SSH_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 export GIT_SSH_COMMAND=$SSH
 
