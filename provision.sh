@@ -1,9 +1,12 @@
 #!/bin/bash
 
+set -e
+
 cd "`dirname \"$0\"`"
 DIR="$(pwd)"
 
 apt-get -y install vagrant
+apt-get -y install git
 
 if ! which vagrant >/dev/null 2>&1 ; then
     echo "Vagrant must be installed."
@@ -33,6 +36,9 @@ vagrant plugin install vagrant-hostsupdater
 vagrant plugin install vagrant-triggers
 
 cp "$DIR/vv-blueprints.json" $ROOT/vvv/vv-blueprints.json
+
+source ~/.bashrc
+
 vv create --domain plugin_trial.dev --name plugin_trial
 
 rm -rf www/plugin_trial/htdocs/wp-content/themes/_s-master
