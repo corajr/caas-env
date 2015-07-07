@@ -6,6 +6,8 @@ set -e
 # DIR="$(pwd)"
 DIR=/vagrant
 
+add-apt-repository -y ppa:git-core/ppa
+apt-get update
 apt-get -y install vagrant
 apt-get -y install git
 
@@ -20,7 +22,7 @@ if [ ! -f $DIR/config/id_rsa ]; then
 fi
 
 SSH_KEY=$DIR/config/id_rsa
-SSH="ssh -v -i $SSH_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+SSH="ssh -i $SSH_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 export GIT_SSH_COMMAND=$SSH
 
