@@ -13,7 +13,7 @@ VAGRANT_FILENAME=$(wget -qO - https://dl.bintray.com/mitchellh/vagrant/|sed -n '
 
 (
 	cd /tmp;
-	wget https://dl.bintray.com/mitchellh/vagrant/$VAGRANT_FILENAME -O $VAGRANT_FILENAME;
+	wget -q https://dl.bintray.com/mitchellh/vagrant/$VAGRANT_FILENAME -O $VAGRANT_FILENAME;
 	dpkg -i $VAGRANT_FILENAME
 )
 
