@@ -20,14 +20,9 @@ if [ ! -f $DIR/config/id_rsa ]; then
 fi
 
 SSH_KEY=$DIR/config/id_rsa
-SSH="ssh -i $SSH_KEY"
+SSH="ssh -i $SSH_KEY -o StrictHostKeyChecking=no"
 
 export GIT_SSH_COMMAND=$SSH
-
-
-mkdir -p ~/.ssh
-(ssh-keygen -R github.com && ssh-keygen -R remeike.webfactional.com) || true
-ssh-keyscan -t rsa github.com remeike.webfactional.com >> ~/.ssh/known_hosts
 
 ROOT=$HOME/caas
 
