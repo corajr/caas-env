@@ -47,10 +47,12 @@ pull_or_clone git@github.com:corajr/wp-zotero-sync caas-git
 
 
 if ! which vv >/dev/null 2>&1 ; then
-    (which brew >/dev/null 2>&1 && brew install bradp/vv/vv) || \ 
-        (git clone git@github.com:bradp/vv.git && \
-            cd vv && \
-            echo export PATH=\"$(pwd):\$PATH\" >> ~/.bashrc)
+	if ! which brew >/dev/null 2>&1; then
+		brew install bradp/vv/vv
+	else
+        git clone git@github.com:bradp/vv.git
+        (cd vv; echo export PATH=\"$(pwd):\$PATH\" >> ~/.bashrc)
+	fi
 fi
 
 pull_or_clone git@github.com:Varying-Vagrant-Vagrants/VVV.git vvv
