@@ -44,7 +44,7 @@ pull_or_clone() {
 pull_or_clone git@github.com:corajr/caas.git caas-git
 pull_or_clone git@github.com:corajr/wp-zotero-sync wp-zotero-sync
 
-VV=$(which vv)
+VV=$(which vv || true)
 
 if [ -z "$VV" ]; then
 	if which brew >/dev/null 2>&1; then
