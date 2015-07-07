@@ -7,12 +7,15 @@ set -e
 DIR=/vagrant
 
 add-apt-repository -y ppa:git-core/ppa
-add-apt-repository -y 'deb http://download.virtualbox.org/virtualbox/debian '$(lsb_release -cs)' contrib non-free' && wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | apt-key add - && apt-get update && apt-get install -y virtualbox-4.3 dkms
+add-apt-repository -y 'deb http://download.virtualbox.org/virtualbox/debian '$(lsb_release -cs)' contrib non-free' && wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | apt-key add - && apt-get update && apt-get install -y virtualbox-4.3 dkms git
 
-apt-get update
+VAGRANT_FILENAME=$(wget -qO - https://dl.bintray.com/mitchellh/vagrant/|sed -n 's/.*href=\"\([^"]*\).*/\1/p'|grep x86_64\.deb|tail -1|cut -d'#' -f2)
 
-apt-get -y install vagrant
-apt-get -y install git
+(
+	cd /tmp;
+	wget https://dl.bintray.com/mitchellh/vagrant/$VAGRANT_FILENAME -O $VAGRANT_FILENAME;
+	dpkg -i $VAGRANT_FILENAME
+)
 
 if ! which vagrant >/dev/null 2>&1 ; then
     echo "Vagrant must be installed."
@@ -79,8 +82,6 @@ yes | $VV create --blueprint plugin_trial \
    --name plugin_trial \
    -db $ROOT/vvv/remeike_caas_wp.sql \
    --defaults
-
-vagrant up
 
 rsync -rlv -e "$SSH" cjr@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ $ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/
 
