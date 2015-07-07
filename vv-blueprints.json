@@ -1,0 +1,58 @@
+{
+  "plugin_trial": {
+    "themes": [
+      {
+        "location": "automattic/_s",
+        "activate": true
+      }
+    ],
+    "mu_plugins": [
+      {
+        "location": "https://github.com/WebDevStudios/WDS-Required-Plugins.git"
+      }
+    ],
+    "plugins": [
+      {
+        "location": "co-authors-plus",
+        "version": "3.1.1",
+        "force": false,
+        "activate": true,
+        "activate_network": false
+      },
+      {
+        "location": "types",
+        "version": "1.6.3",
+        "force": false,
+        "activate": true,
+        "activate_network": false
+      },
+      {
+        "location": "lh-user-taxonomies",
+        "version": "1.1",
+        "force": false,
+        "activate": true,
+        "activate_network": false
+      },
+      {
+        "location": "categories-images",
+        "version": "2.5",
+        "force": false,
+        "activate": true,
+        "activate_network": false
+      },
+      {
+        "location": "dynamic-featured-image",
+        "version": "3.5.0",
+        "force": false,
+        "activate": true,
+        "activate_network": false
+      }
+    ],
+    "options": [
+      "current_theme::_s"
+    ],
+    "defines": [
+      "WP_CACHE::false"
+    ]
+  }
+}

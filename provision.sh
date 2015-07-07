@@ -18,6 +18,10 @@ if [ ! -f /vagrant/config/id_rsa ]; then
 	exit 1
 fi
 
+cp /vagrant/config/id_rsa ~/.ssh/id_rsa
+
+ssh-keygen -R github.com && ssh-keyscan github.com >> ~/.ssh/known_hosts
+
 ROOT=$HOME/caas
 
 mkdir -p $ROOT
