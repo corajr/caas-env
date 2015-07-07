@@ -63,7 +63,15 @@ cp "$DIR/vv-blueprints.json" $ROOT/vvv/vv-blueprints.json
 
 source ~/.bashrc
 
-vv create --domain plugin_trial.dev --name plugin_trial
+$SSH cjr@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | xz' | unxz > $ROOT/vvv/remeike_caas_wp.sql
+
+vv create --blueprint plugin_trial \
+   --domain plugin_trial.dev \
+   --name plugin_trial \
+   -db $ROOT/vvv/remeike_caas_wp.sql \
+   --defaults
+
+rsync -rlv -e "$SSH" cjr@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ $ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/
 
 rm -rf www/plugin_trial/htdocs/wp-content/themes/_s-master
 
@@ -77,9 +85,4 @@ EOF
 
 vagrant up
 
-rsync -rlv -e "$SSH" --dry-run cjr@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ $ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/
-
-(cd $ROOT/vvv; \
- $SSH cjr@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | xz' | unxz > $ROOT/vvv/remeike_caas_wp.sql && \
-	 vagrant ssh -c 'mysql -uroot -proot plugin_trial < /vagrant/remeike_caas_wp.sql')
 
