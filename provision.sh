@@ -13,23 +13,39 @@ if ! which vagrant >/dev/null 2>&1 ; then
     exit 1
 fi
 
+if [ ! -f /vagrant/config/id_rsa ]; then
+	echo "Needs a GitHub SSH key in config/id_rsa"
+	exit 1
+fi
+
 ROOT=$HOME/caas
 
 mkdir -p $ROOT
 cd $ROOT
 
-git clone https://github.com/corajr/caas.git caas-git
-git clone https://github.com/corajr/wp-zotero-sync caas-git
+pull_or_clone() {
+	REPO_ADDR="$1"
+	REPO_DIR="$2"
+	if [ -d "$REPO_DIR" ]; then
+		cd "$REPO_DIR"
+		git pull
+	else
+		git clone "$REPO_ADDR" "$REPO_DIR"
+	fi
+}
+
+pull_or_clone git@github.com:corajr/caas.git caas-git
+pull_or_clone git@github.com:corajr/wp-zotero-sync caas-git
 
 
 if ! which vv >/dev/null 2>&1 ; then
     (which brew >/dev/null 2>&1 && brew install bradp/vv/vv) || \ 
-        (git clone https://github.com/bradp/vv && \
+        (git clone git@github.com:bradp/vv.git && \
             cd vv && \
             echo export PATH=\"$(pwd):\$PATH\" >> ~/.bashrc)
 fi
 
-git clone git://github.com/Varying-Vagrant-Vagrants/VVV.git vvv
+pull_or_clone git@github.com:Varying-Vagrant-Vagrants/VVV.git vvv
 cd vvv
 
 vagrant plugin install vagrant-hostsupdater
