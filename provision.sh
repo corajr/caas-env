@@ -44,13 +44,21 @@ pull_or_clone() {
 pull_or_clone git@github.com:corajr/caas.git caas-git
 pull_or_clone git@github.com:corajr/wp-zotero-sync wp-zotero-sync
 
-if ! which vv >/dev/null 2>&1 ; then
+VV=$(which vv)
+
+if [ -z "$VV" ]; then
 	if which brew >/dev/null 2>&1; then
 		brew install bradp/vv/vv
 	else
         pull_or_clone git@github.com:bradp/vv.git vv
+		VV=`pwd`/vv/vv
         (cd vv; echo export PATH=\"$(pwd):\$PATH\" >> ~/.bashrc)
 	fi
+fi
+
+if [ ! -x "$VV" ]; then
+	echo "vv is not executable; terminating."
+	exit 1
 fi
 
 pull_or_clone git@github.com:Varying-Vagrant-Vagrants/VVV.git vvv
@@ -61,11 +69,9 @@ vagrant plugin install vagrant-triggers
 
 cp "$DIR/vv-blueprints.json" $ROOT/vvv/vv-blueprints.json
 
-source ~/.bashrc
-
 $SSH cjr@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | xz' | unxz > $ROOT/vvv/remeike_caas_wp.sql
 
-vv create --blueprint plugin_trial \
+$VV create --blueprint plugin_trial \
    --domain plugin_trial.dev \
    --name plugin_trial \
    -db $ROOT/vvv/remeike_caas_wp.sql \
