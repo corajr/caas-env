@@ -7,7 +7,10 @@ set -e
 DIR=/vagrant
 
 add-apt-repository -y ppa:git-core/ppa
+add-apt-repository -y 'deb http://download.virtualbox.org/virtualbox/debian '$(lsb_release -cs)' contrib non-free' && wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | apt-key add - && apt-get update && apt-get install -y virtualbox-4.3 dkms
+
 apt-get update
+
 apt-get -y install vagrant
 apt-get -y install git
 
@@ -71,11 +74,13 @@ cp "$DIR/vv-blueprints.json" $ROOT/vvv/vv-blueprints.json
 
 $SSH cjr@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | xz' | unxz > $ROOT/vvv/remeike_caas_wp.sql
 
-$VV create --blueprint plugin_trial \
+yes | $VV create --blueprint plugin_trial \
    --domain plugin_trial.dev \
    --name plugin_trial \
    -db $ROOT/vvv/remeike_caas_wp.sql \
    --defaults
+
+vagrant up
 
 rsync -rlv -e "$SSH" cjr@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ $ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/
 
@@ -88,7 +93,5 @@ config.vm.synced_folder "$ROOT/caas-git", "/srv/www/plugin_trial/htdocs/wp-conte
 config.vm.synced_folder "$ROOT/wp-zotero-sync", "/srv/www/plugin_trial/htdocs/wp-content/plugins/wp-zotero-sync"
 
 EOF
-
-vagrant up
 
 
