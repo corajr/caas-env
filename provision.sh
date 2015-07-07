@@ -3,6 +3,8 @@
 cd "`dirname \"$0\"`"
 DIR="$(pwd)"
 
+apt-get -y install vagrant
+
 if ! which vagrant >/dev/null 2>&1 ; then
     echo "Vagrant must be installed."
     exit 1
