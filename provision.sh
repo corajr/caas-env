@@ -2,8 +2,9 @@
 
 set -e
 
-cd "`dirname \"$0\"`"
-DIR="$(pwd)"
+# cd "`dirname \"$0\"`"
+# DIR="$(pwd)"
+DIR=/vagrant
 
 apt-get -y install vagrant
 apt-get -y install git
