@@ -6,6 +6,7 @@ set -e
 # DIR="$(pwd)"
 DIR=/vagrant
 
+apt-get update
 apt-get -y install software-properties-common python-software-properties
 
 add-apt-repository -y ppa:git-core/ppa
