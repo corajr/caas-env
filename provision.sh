@@ -6,7 +6,7 @@ set -e
 # DIR="$(pwd)"
 DIR=/vagrant
 
-apt-get -y install software-properties-common
+apt-get -y install software-properties-common python-software-properties
 
 add-apt-repository -y ppa:git-core/ppa
 add-apt-repository -y 'deb http://download.virtualbox.org/virtualbox/debian '$(lsb_release -cs)' contrib non-free' && wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | apt-key add - && apt-get update && apt-get install -y virtualbox-4.3 dkms git
