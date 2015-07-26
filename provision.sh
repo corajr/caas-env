@@ -2,19 +2,22 @@
 
 set -e
 
-# cd "`dirname \"$0\"`"
-# DIR="$(pwd)"
-DIR=/vagrant
+cd "`dirname \"$0\"`"
+DIR="$(pwd)"
 
-add-apt-repository -y ppa:git-core/ppa
-add-apt-repository -y 'deb http://download.virtualbox.org/virtualbox/debian '$(lsb_release -cs)' contrib non-free' && wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | apt-key add - && apt-get update && apt-get install -y virtualbox-4.3 dkms git
+if [ "$DIR" = "/" ]; then
+    DIR=/vagrant
+fi
+
+sudo add-apt-repository -y ppa:git-core/ppa
+sudo add-apt-repository -y 'deb http://download.virtualbox.org/virtualbox/debian '$(lsb_release -cs)' contrib non-free' && wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | sudo apt-key add - && sudo apt-get update && sudo apt-get install -y virtualbox-4.3 dkms git
 
 VAGRANT_FILENAME=$(wget -qO - https://dl.bintray.com/mitchellh/vagrant/|sed -n 's/.*href=\"\([^"]*\).*/\1/p'|grep x86_64\.deb|tail -1|cut -d'#' -f2)
 
 (
 	cd /tmp;
 	wget -q https://dl.bintray.com/mitchellh/vagrant/$VAGRANT_FILENAME -O $VAGRANT_FILENAME;
-	dpkg -i $VAGRANT_FILENAME
+	sudo dpkg -i $VAGRANT_FILENAME
 )
 
 if ! which vagrant >/dev/null 2>&1 ; then
