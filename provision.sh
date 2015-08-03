@@ -2,6 +2,7 @@
 
 set -e
 
+cd "`dirname \"$0\"`"
 DIR="$(pwd)"
 
 if [ "$DIR" = "/" ]; then
@@ -10,21 +11,21 @@ fi
 
 which brew || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-brew install vagrant
+which vagrant || brew install Caskroom/cask/vagrant
 
 if ! which vagrant >/dev/null 2>&1 ; then
     echo "Vagrant must be installed."
     exit 1
 fi
 
-SSH_KEY=$(pwd)/id_rsa
+SSH_KEY="$(pwd)/id_rsa"
 
-if [ ! -f $SSH_KEY ]; then
+if [ ! -f "$SSH_KEY" ]; then
     echo "Obtain the SSH key id_rsa first. Exiting"
     exit 1
 fi
 
-SSH="ssh -i $SSH_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+SSH="ssh -i \"${SSH_KEY}\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 export GIT_SSH_COMMAND=$SSH
 
