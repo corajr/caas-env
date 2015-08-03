@@ -2,43 +2,33 @@
 
 set -e
 
-cd "`dirname \"$0\"`"
 DIR="$(pwd)"
 
 if [ "$DIR" = "/" ]; then
     DIR=/vagrant
 fi
 
-sudo add-apt-repository -y ppa:git-core/ppa
-sudo add-apt-repository -y 'deb http://download.virtualbox.org/virtualbox/debian '$(lsb_release -cs)' contrib non-free' && wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | sudo apt-key add - && sudo apt-get update && sudo apt-get install -y virtualbox-4.3 dkms git
+which brew || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-VAGRANT_FILENAME=$(wget -qO - https://dl.bintray.com/mitchellh/vagrant/|sed -n 's/.*href=\"\([^"]*\).*/\1/p'|grep x86_64\.deb|tail -1|cut -d'#' -f2)
-
-(
-	cd /tmp;
-	wget -q https://dl.bintray.com/mitchellh/vagrant/$VAGRANT_FILENAME -O $VAGRANT_FILENAME;
-	sudo dpkg -i $VAGRANT_FILENAME
-)
+brew install vagrant
 
 if ! which vagrant >/dev/null 2>&1 ; then
     echo "Vagrant must be installed."
     exit 1
 fi
 
-if [ ! -f $DIR/config/id_rsa ]; then
-	echo "Needs an SSH key in config/id_rsa"
-	exit 1
+SSH_KEY=$(pwd)/id_rsa
+
+if [ ! -f $SSH_KEY ]; then
+    echo "Obtain the SSH key id_rsa first. Exiting"
+    exit 1
 fi
 
-SSH_KEY=$DIR/config/id_rsa
 SSH="ssh -i $SSH_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 export GIT_SSH_COMMAND=$SSH
 
-ROOT=$HOME/caas
-
-mkdir -p $ROOT
-cd $ROOT
+ROOT=$(pwd)
 
 pull_or_clone() {
 	REPO_ADDR="$1"
@@ -78,7 +68,7 @@ vagrant plugin install vagrant-triggers
 
 cp "$DIR/vv-blueprints.json" $ROOT/vvv/vv-blueprints.json
 
-$SSH cjr@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | xz' | unxz > $ROOT/vvv/remeike_caas_wp.sql
+$SSH remeike@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | xz' | unxz > $ROOT/vvv/remeike_caas_wp.sql
 
 yes | $VV create --blueprint plugin_trial \
    --domain plugin_trial.dev \
@@ -86,7 +76,7 @@ yes | $VV create --blueprint plugin_trial \
    -db $ROOT/vvv/remeike_caas_wp.sql \
    --defaults
 
-rsync -rlv -e "$SSH" cjr@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ $ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/
+rsync -rlv -e "$SSH" remeike@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ $ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/
 
 rm -rf www/plugin_trial/htdocs/wp-content/themes/_s-master
 
