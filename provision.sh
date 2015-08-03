@@ -13,6 +13,8 @@ which brew || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/i
 
 which vagrant || brew install Caskroom/cask/vagrant
 
+which VBoxManage || brew install Caskroom/cask/virtualbox
+
 if ! which vagrant >/dev/null 2>&1 ; then
     echo "Vagrant must be installed."
     exit 1
@@ -78,13 +80,14 @@ cp "$DIR/vv-blueprints.json" "$ROOT/vvv/vv-blueprints.json"
 
 $SSH remeike@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | bzip2' | bzcat > "$ROOT/vvv/remeike_caas_wp.sql"
 
-yes | "$VV" create --blueprint plugin_trial \
-   --domain plugin_trial.dev \
-   --name plugin_trial \
-   -db "$ROOT/vvv/remeike_caas_wp.sql" \
-   --defaults
+($VV list | grep plugin_trial) || \
+    (yes | "$VV" create --blueprint plugin_trial \
+       --domain plugin_trial.dev \
+       --name plugin_trial \
+       -db "$ROOT/vvv/remeike_caas_wp.sql" \
+       --defaults)
 
-rsync -rlv -e "\"$SSH\"" remeike@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ $ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/
+rsync -rlv -e ssh remeike@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ "$ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/"
 
 rm -rf www/plugin_trial/htdocs/wp-content/themes/_s-master
 
