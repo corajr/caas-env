@@ -64,12 +64,14 @@ fi
 pull_or_clone git@github.com:Varying-Vagrant-Vagrants/VVV.git vvv
 cd vvv
 
-vagrant plugin install vagrant-hostsupdater
-vagrant plugin install vagrant-triggers
+PLUGINS=`vagrant plugin list`
 
-cp "$DIR/vv-blueprints.json" $ROOT/vvv/vv-blueprints.json
+(echo $PLUGINS | grep vagrant-hostsupdater) || vagrant plugin install vagrant-hostsupdater
+(echo $PLUGINS | grep vagrant-triggers) || vagrant plugin install vagrant-triggers
 
-$SSH remeike@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | xz' | unxz > $ROOT/vvv/remeike_caas_wp.sql
+cp "$DIR/vv-blueprints.json" "$ROOT/vvv/vv-blueprints.json"
+
+"$SSH" remeike@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | bzip2 -c' | bzcat > "$ROOT/vvv/remeike_caas_wp.sql"
 
 yes | $VV create --blueprint plugin_trial \
    --domain plugin_trial.dev \
