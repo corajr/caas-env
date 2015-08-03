@@ -18,14 +18,19 @@ if ! which vagrant >/dev/null 2>&1 ; then
     exit 1
 fi
 
-SSH_KEY="$(pwd)/id_rsa"
+mkdir -p ~/.ssh
 
-if [ ! -f "$SSH_KEY" ]; then
+if [ ! -f "$DIR/id_rsa" ]; then
     echo "Obtain the SSH key id_rsa first. Exiting"
     exit 1
 fi
 
-SSH="ssh -i \"${SSH_KEY}\" -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+cp "$DIR/id_rsa" "$HOME/.ssh/caas_rsa"
+cp "$DIR/id_rsa.pub" "$HOME/.ssh/caas_rsa.pub"
+
+SSH_KEY="$HOME/.ssh/caas_rsa"
+
+SSH="ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 export GIT_SSH_COMMAND=$SSH
 
@@ -71,15 +76,15 @@ PLUGINS=`vagrant plugin list`
 
 cp "$DIR/vv-blueprints.json" "$ROOT/vvv/vv-blueprints.json"
 
-"$SSH" remeike@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | bzip2 -c' | bzcat > "$ROOT/vvv/remeike_caas_wp.sql"
+$SSH remeike@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | bzip2' | bzcat > "$ROOT/vvv/remeike_caas_wp.sql"
 
-yes | $VV create --blueprint plugin_trial \
+yes | "$VV" create --blueprint plugin_trial \
    --domain plugin_trial.dev \
    --name plugin_trial \
-   -db $ROOT/vvv/remeike_caas_wp.sql \
+   -db "$ROOT/vvv/remeike_caas_wp.sql" \
    --defaults
 
-rsync -rlv -e "$SSH" remeike@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ $ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/
+rsync -rlv -e "\"$SSH\"" remeike@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ $ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/
 
 rm -rf www/plugin_trial/htdocs/wp-content/themes/_s-master
 
