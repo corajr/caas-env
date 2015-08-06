@@ -2,7 +2,7 @@
   "plugin_trial": {
     "themes": [
       {
-        "location": "automattic/_s",
+        "location": "https://github.com/Automattic/_s/archive/master.zip",
         "activate": true
       }
     ],
@@ -27,6 +27,13 @@
         "activate_network": false
       },
       {
+        "location": "fotorama",
+        "version": "4.6.3",
+        "force": false,
+        "activate": true,
+        "activate_network": false
+      },
+      {
         "location": "lh-user-taxonomies",
         "version": "1.1",
         "force": false,
@@ -43,6 +50,20 @@
       {
         "location": "dynamic-featured-image",
         "version": "3.5.0",
+        "force": false,
+        "activate": true,
+        "activate_network": false
+      },
+      {
+        "location": "wp-user-avatar",
+        "version": "2.0.2",
+        "force": false,
+        "activate": true,
+        "activate_network": false
+      },
+      {
+        "location": "https://github.com/frnhr/simple-user-ordering/archive/master.zip",
+        "version": null,
         "force": false,
         "activate": true,
         "activate_network": false

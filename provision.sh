@@ -36,16 +36,16 @@ SSH="ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/nu
 
 export GIT_SSH_COMMAND=$SSH
 
-ROOT=$(pwd)
+ROOT="$(pwd)"
 
 pull_or_clone() {
-	REPO_ADDR="$1"
-	REPO_DIR="$2"
-	if [ -d "$REPO_DIR" ]; then
-		(cd "$REPO_DIR"; git pull)
-	else
-		git clone "$REPO_ADDR" "$REPO_DIR"
-	fi
+  REPO_ADDR="$1"
+  REPO_DIR="$2"
+  if [ -d "$REPO_DIR" ]; then
+    (cd "$REPO_DIR"; git pull)
+  else
+    git clone "$REPO_ADDR" "$REPO_DIR"
+  fi
 }
 
 pull_or_clone git@github.com:corajr/caas.git caas-git
@@ -54,19 +54,23 @@ pull_or_clone git@github.com:corajr/wp-zotero-sync wp-zotero-sync
 VV=$(which vv || true)
 
 if [ -z "$VV" ]; then
-	if which brew >/dev/null 2>&1; then
-		brew install bradp/vv/vv
-	else
+  if which brew >/dev/null 2>&1; then
+    brew install bradp/vv/vv
+  else
         pull_or_clone git@github.com:bradp/vv.git vv
-		VV=`pwd`/vv/vv
+    VV=`pwd`/vv/vv
         (cd vv; echo export PATH=\"$(pwd):\$PATH\" >> ~/.bashrc)
-	fi
+  fi
 fi
 
 if [ ! -x "$VV" ]; then
-	echo "vv is not executable; terminating."
-	exit 1
+  echo "vv is not executable; terminating."
+  exit 1
 fi
+
+my_vv() {
+  $VV -p "$ROOT/vvv" "$@"
+}
 
 pull_or_clone git@github.com:Varying-Vagrant-Vagrants/VVV.git vvv
 cd vvv
@@ -80,8 +84,8 @@ cp "$DIR/vv-blueprints.json" "$ROOT/vvv/vv-blueprints.json"
 
 $SSH remeike@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | bzip2' | bzcat > "$ROOT/vvv/remeike_caas_wp.sql"
 
-($VV list | grep plugin_trial) || \
-    (yes | "$VV" create --blueprint plugin_trial \
+(my_vv list | grep plugin_trial) || \
+    (yes | my_vv create --blueprint plugin_trial \
        --domain plugin_trial.dev \
        --name plugin_trial \
        -db "$ROOT/vvv/remeike_caas_wp.sql" \
@@ -99,4 +103,18 @@ config.vm.synced_folder "$ROOT/wp-zotero-sync", "/srv/www/plugin_trial/htdocs/wp
 
 EOF
 
+cat <<EOF > Customfile
 
+config.vm.synced_folder "$ROOT/caas-git", "/srv/www/plugin_trial/htdocs/wp-content/themes/_s-master"
+
+config.vm.synced_folder "$ROOT/wp-zotero-sync", "/srv/www/plugin_trial/htdocs/wp-content/plugins/wp-zotero-sync"
+
+EOF
+
+cat <<EOF >> www/plugin_trial/htdocs/wp-config.php
+
+define('WP_HOME','http://plugin_trial.dev');
+define('WP_SITEURL','http://plugin_trial.dev');
+EOF
+
+vagrant up
