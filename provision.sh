@@ -9,36 +9,34 @@ if [ "$DIR" = "/" ]; then
     DIR=/vagrant
 fi
 
-sudo add-apt-repository -y ppa:git-core/ppa
-sudo add-apt-repository -y 'deb http://download.virtualbox.org/virtualbox/debian '$(lsb_release -cs)' contrib non-free' && wget -q http://download.virtualbox.org/virtualbox/debian/oracle_vbox.asc -O- | sudo apt-key add - && sudo apt-get update && sudo apt-get install -y virtualbox-4.3 dkms git
+which brew || ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-VAGRANT_FILENAME=$(wget -qO - https://dl.bintray.com/mitchellh/vagrant/|sed -n 's/.*href=\"\([^"]*\).*/\1/p'|grep x86_64\.deb|tail -1|cut -d'#' -f2)
+which vagrant || brew install Caskroom/cask/vagrant
 
-(
-	cd /tmp;
-	wget -q https://dl.bintray.com/mitchellh/vagrant/$VAGRANT_FILENAME -O $VAGRANT_FILENAME;
-	sudo dpkg -i $VAGRANT_FILENAME
-)
+which VBoxManage || brew install Caskroom/cask/virtualbox
 
 if ! which vagrant >/dev/null 2>&1 ; then
     echo "Vagrant must be installed."
     exit 1
 fi
 
-if [ ! -f $DIR/config/id_rsa ]; then
-	echo "Needs an SSH key in config/id_rsa"
-	exit 1
+mkdir -p ~/.ssh
+
+if [ ! -f "$DIR/id_rsa" ]; then
+    echo "Obtain the SSH key id_rsa first. Exiting"
+    exit 1
 fi
 
-SSH_KEY=$DIR/config/id_rsa
-SSH="ssh -i $SSH_KEY -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
+cp "$DIR/id_rsa" "$HOME/.ssh/caas_rsa"
+cp "$DIR/id_rsa.pub" "$HOME/.ssh/caas_rsa.pub"
+
+SSH_KEY="$HOME/.ssh/caas_rsa"
+
+SSH="ssh -i ${SSH_KEY} -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null"
 
 export GIT_SSH_COMMAND=$SSH
 
-ROOT=$HOME/caas
-
-mkdir -p $ROOT
-cd $ROOT
+ROOT=$(pwd)
 
 pull_or_clone() {
 	REPO_ADDR="$1"
@@ -73,20 +71,23 @@ fi
 pull_or_clone git@github.com:Varying-Vagrant-Vagrants/VVV.git vvv
 cd vvv
 
-vagrant plugin install vagrant-hostsupdater
-vagrant plugin install vagrant-triggers
+PLUGINS=`vagrant plugin list`
 
-cp "$DIR/vv-blueprints.json" $ROOT/vvv/vv-blueprints.json
+(echo $PLUGINS | grep vagrant-hostsupdater) || vagrant plugin install vagrant-hostsupdater
+(echo $PLUGINS | grep vagrant-triggers) || vagrant plugin install vagrant-triggers
 
-$SSH cjr@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | xz' | unxz > $ROOT/vvv/remeike_caas_wp.sql
+cp "$DIR/vv-blueprints.json" "$ROOT/vvv/vv-blueprints.json"
 
-yes | $VV create --blueprint plugin_trial \
-   --domain plugin_trial.dev \
-   --name plugin_trial \
-   -db $ROOT/vvv/remeike_caas_wp.sql \
-   --defaults
+$SSH remeike@remeike.webfactional.com 'mysqldump --add-drop-table remeike_caas_wp | bzip2' | bzcat > "$ROOT/vvv/remeike_caas_wp.sql"
 
-rsync -rlv -e "$SSH" cjr@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ $ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/
+($VV list | grep plugin_trial) || \
+    (yes | "$VV" create --blueprint plugin_trial \
+       --domain plugin_trial.dev \
+       --name plugin_trial \
+       -db "$ROOT/vvv/remeike_caas_wp.sql" \
+       --defaults)
+
+rsync -rlv -e ssh remeike@remeike.webfactional.com:/home/remeike/webapps/caas/wp-content/uploads/ "$ROOT/vvv/www/plugin_trial/htdocs/wp-content/uploads/"
 
 rm -rf www/plugin_trial/htdocs/wp-content/themes/_s-master
 
