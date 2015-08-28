@@ -97,24 +97,10 @@ rm -rf www/plugin_trial/htdocs/wp-content/themes/_s-master
 
 cat <<EOF > Customfile
 
-config.vm.synced_folder "$ROOT/caas-git", "/srv/www/plugin_trial/htdocs/wp-content/themes/_s-master"
+config.vm.synced_folder "../caas-git", "/srv/www/plugin_trial/htdocs/wp-content/themes/_s-master"
 
-config.vm.synced_folder "$ROOT/wp-zotero-sync", "/srv/www/plugin_trial/htdocs/wp-content/plugins/wp-zotero-sync"
+config.vm.synced_folder "../wp-zotero-sync", "/srv/www/plugin_trial/htdocs/wp-content/plugins/wp-zotero-sync"
 
-EOF
-
-cat <<EOF > Customfile
-
-config.vm.synced_folder "$ROOT/caas-git", "/srv/www/plugin_trial/htdocs/wp-content/themes/_s-master"
-
-config.vm.synced_folder "$ROOT/wp-zotero-sync", "/srv/www/plugin_trial/htdocs/wp-content/plugins/wp-zotero-sync"
-
-EOF
-
-cat <<EOF >> www/plugin_trial/htdocs/wp-config.php
-
-define('WP_HOME','http://plugin_trial.dev');
-define('WP_SITEURL','http://plugin_trial.dev');
 EOF
 
 vagrant up
